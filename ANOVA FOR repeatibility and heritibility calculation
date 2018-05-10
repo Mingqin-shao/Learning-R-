@@ -174,13 +174,6 @@ head(anova_pu15rt_score$residuals,5)
 write.csv(as.data.frame(anova_pu15rt_score$residuals), file="pu15score_residuals.csv")
 #### calculate standard residuals
 
-####2018may8th Final culculate sdr and ranking them
-sdr_PI17RtLghChg<-abs(as.data.frame(anova_PI17RtLghChg$residuals)/sqrt( anova(anova_PI17RtLghChg)[["Mean Sq"]] [3]))###culculate stand_residual
-sdr_r_PI17RtLghChg<-cbind.data.frame(sdr_PI17RtLghChg, anova_PI17RtLghChg$residuals)###combine standard residul and residuals to make a new data frame for ranking sdr
-ordered_sdr_PI17RtLghChg<- as.data.frame(sdr_r_PI17RtLghChg[order(-sdr_r_PI17RtLghChg$`anova_PI17RtLghChg$residuals`),] )
-names(ordered_sdr_PI17RtLghChg)<-c("standard_residual","residual")
-head(ordered_sdr_PI17RtLghChg,10)
-write.csv(ordered_sdr_PI17RtLghChg,file="ordered_sdr_PI17RtLghChg.csv")
 
 #### Anova processing PU DATA 2018.05.08
 PI17RtLghChg<-cbind(as.data.frame(SDS_FV_PU_PI_DataR$line),rep2,c(SDS_FV_PU_PI_DataR$PI17RtLghChgR1,SDS_FV_PU_PI_DataR$PI17RtLghChgR2))
@@ -195,14 +188,4 @@ anova_PI17RtLghChg
 summary(anova_PI17RtLghChg)
 head(anova_PI17RtLghChg$residuals,5)
 write.csv(as.data.frame(anova_PI17RtLghChg$residuals), file="pu15score_residuals.csv")
-
-
-####2018may8th Final culculate sdr and ranking them
-sdr_PI17RtLghChg<-abs(as.data.frame(anova_PI17RtLghChg$residuals)/sqrt( anova(anova_PI17RtLghChg)[["Mean Sq"]] [3]))###culculate stand_residual
-sdr_r_PI17RtLghChg<-cbind.data.frame(sdr_PI17RtLghChg, anova_PI17RtLghChg$residuals)###combine standard residul and residuals to make a new data frame for ranking sdr
-ordered_sdr_PI17RtLghChg<- as.data.frame(sdr_r_PI17RtLghChg[order(-sdr_r_PI17RtLghChg$`anova_PI17RtLghChg$residuals`),] )
-names(ordered_sdr_PI17RtLghChg)<-c("standard_residual","residual")
-head(ordered_sdr_PI17RtLghChg,10)
-write.csv(ordered_sdr_PI17RtLghChg,file="ordered_sdr_PI17RtLghChg.csv")
-
 
