@@ -182,3 +182,16 @@ names(ordered_sdr_PI17RtLghChg)<-c("standard_residual","residual")
 head(ordered_sdr_PI17RtLghChg,10)
 write.csv(ordered_sdr_PI17RtLghChg,file="ordered_sdr_PI17RtLghChg.csv")
 
+#### Anova processing PU DATA 2018.05.08
+PI17RtLghChg<-cbind(as.data.frame(SDS_FV_PU_PI_DataR$line),rep2,c(SDS_FV_PU_PI_DataR$PI17RtLghChgR1,SDS_FV_PU_PI_DataR$PI17RtLghChgR2))
+### Extract Columns from Data Frame for root severity scores of 2015PU.
+head(PI17RtLghChg)
+str(PI17RtLghChg)
+names(PI17RtLghChg)<-c("line","rep","score")
+head(PI17RtLghChg)
+tail(PI17RtLghChg)
+anova_PI17RtLghChg<- aov(score ~ line + rep, data=PI17RtLghChg)###anova PI17RtLghChg
+anova_PI17RtLghChg
+summary(anova_PI17RtLghChg)
+head(anova_PI17RtLghChg$residuals,5)
+write.csv(as.data.frame(anova_PI17RtLghChg$residuals), file="pu15score_residuals.csv")
