@@ -1,0 +1,109 @@
+> library("dplyr")# used to select sme of the colums in primary data.
+> sjchange2<-select(SJ14_15AllRepsForR, contains("Chg"))
+> View(sjchange2)
+> sjchange100<-as.matrix.data.frame(sjchange2)*100 ### change ratio into percentage
+> 
+> head(sjchange100,5)#### the value was changed into percentage by *100
+     SJ14DrwtChg_R1 SJ14DrwtChg_R2 SJ14DrwtChg_R3 SJ15DrwtChg_R1
+[1,]          -13.3            9.6           93.9             NA
+[2,]            0.0          -65.0          -70.2          -76.5
+[3,]          -43.2          -63.7          -24.6          -72.6
+> write.csv(sjchange100,file="sjpercentage.csv")
+### manually replace the ratio data with percentage data for drwtChg, RtLghChg and ShtLghChg.
+
+> SJ14_15AllRepsForR <- read.csv("C:/Users/cfanskurlelab/Desktop/Shao/Pheno - process/SJ Pheno/SJ14_15AllRepsForR.csv") ### load changed data
+>   View(SJ14_15AllRepsForR)
+> sj_data<-SJ14_15AllRepsForR### change name for the new data frame.
+> head(sj_data,3)
+
+
+> sj14score<-cbind(as.data.frame(sj_data$line),rep,c(sj_data$SJ14RtScore_trt_R1,sj_data$SJ14RtScore_trt_R2,sj_data$SJ14RtScore_trt_R3)) 
+### Extract Columns from Data Frame for root rot severity scores of 2014.
+
+> head(sj14score,3)
+  
+### the name of the vectors is too long, need change it shorter.
+
+> names(sj14score)<- c("line","rep","score") ### chnage name of vector 3. 
+> head(sj14score,3)
+
+> anova_sj14score <- aov(score ~ line + rep, data=sj14score)###anova for 2014 score data
+> anova_sj14score
+> summary(anova_sj14score)
+
+write.csv(anova$residuals, file="sj14drwt_trt_residuals.csv") ### output residuls for outlier checking
+write.csv(anova_sj14drwt_untrt$residuals, file="anova_sj14drwt_untrt_residuals.csv")
+write.csv(anova_sj14score$residuals, file="anova_sj14score_residuals.csv")
+write.csv(anova_sj15score$residuals, file="anova_sj15score_residuals.csv")
+write.csv(anova_sj15drwt_trt$residuals, file="anova_sj15drwt_trt_residuals.csv")
+write.csv(anova_sj15drwt_untrt$residuals, file="anova_sj15drwt_untrt_residuals.csv")
+write.csv( anova_sj14drwtChg$residuals, file=" anova_sj14drwtChg_residuals.csv")
+write.csv(anova_sj15drwtChg$residuals, file="anova_sj15drwtChg_residuals.csv")
+write.csv( anova_sj15ShtLgthChg$residuals, file=" anova_sj15ShtLgthChg_residuals.csv")
+write.csv(anova_sj15ShtLgth_trt_$residuals, file="anova_sj15ShtLgth_trt__residuals.csv")
+write.csv( anova_sj15ShtLgth_untrt_$residuals, file=" anova_sj15ShtLgth_untrt__residuals.csv")
+write.csv(anova_sj14score$residuals, file="anova_sj14score_residuals.csv")
+write.csv(anova_sj14score$residuals, file="anova_sj14score_residuals.csv")
+write.csv(anova_sj14score$residuals, file="anova_sj14score_residuals.csv")
+write.csv(anova_sj14score$residuals, file="anova_sj14score_residuals.csv")
+# check outliers directerly in R 
+stand_residual_anova<-abs(as.data.frame(anova$residuals)/sqrt( anova(anova)[["Mean Sq"]] [3]))###culculate stand_residual
+head(stand_residual_anova,5)
+
+sort_anova<-sort(stand_residual_anova$`anova$residuals`,decreasing = TRUE,index.return = TRUE)### sort standard residuals
+> str(sort_anova)
+> sd<-as.data.frame(sort_anova) ###transfer sorted result into data frame for check the individual sample ID
+> str(sd)
+> head(sd,10)#### check the top standard residuals and the coresponding ID
+
+# check outliers directerly in R 
+sdr_sj14drwt_trt<-abs(as.data.frame(anova_sj14drwt_untrt$residuals)/sqrt( anova(anova_sj14drwt_untrt)[["Mean Sq"]] [3]))###culculate stand_residual
+head(sdr_sj14drwt_trt,5)
+
+sort_sdr_sj14drwt_trt<-sort(sdr_sj14drwt_trt,decreasing = TRUE,index.return = TRUE)### sort standard residuals
+str(sort_sdr_sj14drwt_trt) 
+sort_sdr_sj14drwt_trt<-as.data.frame(sort_sdr_sj14drwt_trt) ###transfer sorted result into data frame for check the individual sample ID
+names(sort_sdr_sj14drwt_trt)[1]<-"sd"
+names(sort_sdr_sj14drwt_trt)[2]<-"ID"
+str(sort_sdr_sj14drwt_trt)
+head(sort_sdr_sj14drwt_trt,10)#### check the top standard residuals and the coresponding ID
+
+ 
+####Compare order function with or without "as.data.frame"
+> orderxxx<- xxsdr_sj14drwt_untrt[order(-xxsdr_sj14drwt_untrt$`anova_sj14drwt_untrt$residuals`),] ###rank data frame by specific vector.
+> 
+> tail(orderxxx,5)
+[1] 0.0028171911 0.0028171911 0.0028171911 0.0021435150 0.0006736761
+> orderxxx<- as.data.frame(xxsdr_sj14drwt_untrt[order(-xxsdr_sj14drwt_untrt$`anova_sj14drwt_untrt$residuals`),] ) ###rank data frame by specific vector.
+>  tail(orderxxx,5)
+    xxsdr_sj14drwt_untrt[order(-xxsdr_sj14drwt_untrt$`anova_sj14drwt_untrt$residuals`), ]
+743                                                                          0.0028171911
+744                                                                          0.0028171911
+745                                                                          0.0028171911
+746                                                                          0.0021435150
+747                                                                          0.0006736761
+> newcombined<-cbind.data.frame(xxsdr_sj14drwt_untrt, anova_sj14drwt_untrt$residuals  )
+> tail(newcombined,5)
+    anova_sj14drwt_untrt$residuals anova_sj14drwt_untrt$residuals
+833                      0.5816275                   -0.012713521
+834                      1.3136072                   -0.028713521
+835                      1.0653269                    0.023286479
+836                      0.2156376                   -0.004713521
+837                      1.0696140                   -0.023380187
+> orderxxx2<- as.data.frame(newcombined[order(-newcombined$`anova_sj14drwt_untrt$residuals`),] )
+> tail(orderxxx2,5)
+    anova_sj14drwt_untrt$residuals anova_sj14drwt_untrt$residuals
+356                   0.0028171911                   6.157965e-05
+416                   0.0028171911                   6.157965e-05
+381                   0.0028171911                   6.157965e-05
+720                   0.0021435150                  -4.685408e-05
+116                   0.0006736761                  -1.472557e-05
+> head(orderxxx2,20)
+    anova_sj14drwt_untrt$residuals anova_sj14drwt_untrt$residuals
+571                       4.831973                     0.10561981
+52                        3.492827                    -0.07634806
+567                       3.261266                     0.07128648
+331                       3.159480                     0.06906158
+62                        3.155989                     0.06898527
+9                         3.081088                    -0.06734806
+13                        3.020090                    -0.06601473
