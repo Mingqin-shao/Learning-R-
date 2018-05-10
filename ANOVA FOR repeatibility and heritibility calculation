@@ -107,3 +107,69 @@ head(sort_sdr_sj14drwt_trt,10)#### check the top standard residuals and the core
 62                        3.155989                     0.06898527
 9                         3.081088                    -0.06734806
 13                        3.020090                    -0.06601473
+
+
+
+####Final for calculate standard divisions
+sdr_sj14drwt_untrt<-abs((sd_sort_anova_sj14drwt_untrt)/sqrt( anova(anova_sj14drwt_untrt)[["Mean Sq"]] [3]))###culculate stand_residual
+> head(sdr_sj14drwt_untrt,5)
+###sort the sdr
+sort_sdr_sj14drwt_untrt<-sort(sdr_sdr_sj14drwt_untrt$x,decreasing = TRUE,index.return = TRUE)
+
+##### use data frame can get result with primary ID from 1 to 837...
+> sdr_sj14drwt_untrt<-abs(as.data.frame(sd_sort_anova_sj14drwt_untrt)/sqrt( anova(anova_sj14drwt_untrt)[["Mean Sq"]] [3]))###culculate stand_residual
+
+> head(sdr_sj14drwt_untrt,5)
+> cbind.data.frame(sdr_sj14drwt_untrt, anova_sj14drwt_untrt$residuals  )
+
+>sdr_sj14drwt_untrt <- sdr_sj14drwt_untrt[order(-sdr_sj14drwt_untrt$x),] ###rank data frame by specific vector.
+
+> head(order1,5)
+sdr_sj14drwt_untrt$ix<-NULL
+names(sdr_sj14drwt_untrt)[1]<-"sdr"
+head(sdr_sj14drwt_untrt,5)
+write.csv(sdr_sj14drwt_untrt,file="sdr_sj14drwt_untrt.csv")
+
+###test
+sdr_sj14drwt_untrt<-abs(as.data.frame(sd_sort_anova_sj14drwt_untrt)/sqrt( anova(anova_sj14drwt_untrt)[["Mean Sq"]] [3]))###culculate stand_residual
+
+head(sdr_sj14drwt_untrt,5)
+cbind.data.frame(sdr_sj14drwt_untrt, anova_sj14drwt_untrt$residuals  )
+
+###culculate sdr
+> xxsdr_sj14drwt_untrt<-abs(as.data.frame(anova_sj14drwt_untrt$residuals)/sqrt( anova(anova_sj14drwt_untrt)[["Mean Sq"]] [3]))###culculate stand_residual
+> newcombined<-cbind.data.frame(xxsdr_sj14drwt_untrt, anova_sj14drwt_untrt$residuals  )
+> tail(newcombined,5)
+> orderxxx2<- as.data.frame(newcombined[order(-newcombined$`anova_sj14drwt_untrt$residuals`),] )
+write.csv(orderxxx2,file="orderxxx2.csv")
+
+####Final culculate sdr and ranking them
+xxsdr_sj15drwt_untrt<-abs(as.data.frame(anova_sj15drwt_untrt$residuals)/sqrt( anova(anova_sj15drwt_untrt)[["Mean Sq"]] [3]))###culculate stand_residual
+newcombined15<-cbind.data.frame(xxsdr_sj15drwt_untrt, anova_sj15drwt_untrt$residuals  )
+tail(newcombined,5)
+orderxxx15<- as.data.frame(newcombined15[order(-newcombined15$`anova_sj15drwt_untrt$residuals`),] )
+write.csv(orderxxx15,file="orderxxx15.csv")
+head(orderxxx15,5)
+####2018may8th Final culculate sdr and ranking them
+sdr_sj14drwt_trt<-abs(as.data.frame(anova_sj14drwt_trt$residuals)/sqrt( anova(anova_sj14drwt_trt)[["Mean Sq"]] [3]))###culculate stand_residual
+sdr_r_sj14drwt_trt<-cbind.data.frame(sdr_sj14drwt_trt, anova_sj14drwt_trt$residuals)###combine standard residul and residuals to make a new data frame for ranking sdr
+ordered_sdr_sj14drwt_trt<- as.data.frame(sdr_r_sj14drwt_trt[order(-sdr_r_sj14drwt_trt$`anova_sj14drwt_trt$residuals`),] )
+names(ordered_sdr_sj14drwt_trt)<-c("standard_residual","residual")
+head(ordered_sdr_sj14drwt_trt,10)
+write.csv(ordered_sdr_sj14drwt_trt,file="ordered_sdr_sj14drwt_trt.csv")
+
+
+#### processing PU DATA 2018.05.08
+pu15rt_score<-cbind(as.data.frame(SDS_FV_PU_PI_DataR$line),rep3,c(SDS_FV_PU_PI_DataR$pu15RtScoreR1,SDS_FV_PU_PI_DataR$pu15RtScoreR2,SDS_FV_PU_PI_DataR$pu15RtScoreR3))
+### Extract Columns from Data Frame for root severity scores of 2015PU.
+head(pu15rt_score)
+str(pu15rt_score)
+names(pu15rt_score)<-c("line","rep","score")
+head(pu15rt_score)
+tail(pu15rt_score)
+anova_pu15rt_score <- aov(score ~ line + rep, data=pu15rt_score)###anova pu15rt_score
+anova_pu15rt_score
+summary(anova_pu15rt_score)
+head(anova_pu15rt_score$residuals,5)
+write.csv(as.data.frame(anova_pu15rt_score$residuals), file="pu15score_residuals.csv")
+#### calculate standard residuals
