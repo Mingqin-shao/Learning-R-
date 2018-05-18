@@ -1,0 +1,127 @@
+SOFTWARE
+FORMULAE IN R: ANOVA AND OTHER MODELS, MIXED AND FIXED
+http://conjugateprior.org/2013/01/formulae-in-r-anova/
+
+ORMULAE IN R: ANOVA AND OTHER MODELS, MIXED AND FIXED
+JANUARY 10, 2013 | WILL
+R’s formula interface is sweet but sometimes confusing. ANOVA is seldom sweet and almost always confusing. And random (a.k.a. mixed) versus fixed effects decisions seem to hurt peoples’ heads too. So, let’s dive into the intersection of these three.
+
+I’m aware that there are lots of packages for running ANOVA models that make things nicer for particular fields. I’m just going to ignore them all here and focus on the builtin function aov and the standard mixed model package lme4. I’m not even going to talk about the analysis you might do with such models, still less delve into the horrors of Type 1/2/3 sums of squares. This is just the model specification part.
+
+In the following, assume that Y is a dependent variable and A, B, C, etc. are predictors, all contained in data frame d.
+
+FORMULA RECAP
+If you use R then you probably already know this, but let’s recap anyway.
+Start with an additive model of Y using the linear model function lm
+
+lm(Y ~ A + B, data=d)
+Interactions are expressed succinctly with the asterisk
+
+lm(Y ~ A * B, data=d)
+or equivalently but more explicitly by specifying component parts using the colon notation, like
+
+lm(Y ~ A + B + A:B, data=d)
+This is useful for more complex interaction structures, e.g.
+
+lm(Y ~ A * B * C, data=d)
+which contains all main effects, all two way interactions, and a three way interaction. On the other hand
+
+lm(Y ~ A + B + C + A:B + A:C + B:C, data=d)
+is the same except for having no three way interaction.
+
+If you’re feeling fancy you can get the same effect as the model above by raising the variables to a power
+
+lm(Y ~ (A + B + C)**2, data=d)
+lm(Y ~ (A + B + C)^2, data=d)
+which, if you remember your algebra, amounts to the same thing. Frankly I find this a bit too clever, not least because
+
+lm(Y ~ A + B + B**2, data=d)
+does not specify a model with a linear effect of A and a quadratic effect of B as every beginning R user and everyone who takes the algebra analogy too seriously feels that it should.
+
+Both of these specifications obey the principle of marginality, which requires, roughly, that all higher order interaction have their lower order siblings in the model unless you have a good reason. (Good reasons are shown below and tend to have to do with nesting). The asterisk and the power notation make sure your models obey this, whereas the colon invites you to forget something.
+
+Squeezing the algebra analogy a bit further, another way to get the all two way interaction model is to make a three way model and then subtract the highest interaction term, like
+
+lm(Y ~ A*B*C - A:B:C, data=d)
+which is cute, but arguably not very useful.
+
+Finally, remember that an intercept is almost always a good idea due to the principle of marginality, so R adds one by default and represents it with a 1. Consequently, these formulae specify the same model
+
+lm(Y ~ A + B, data=d)
+lm(Y ~ 1 + A + B, data=d)
+In the model matrix the intercept really is a column of ones, but R uses it rather more analogically as we will see when specifying mixed models.
+
+In the unlikely event we want to remove the intercept, it can be replaced by a zero, or simply subtracted. Consequently these formulae specify the same, not very sensible, model:
+
+lm(Y ~ 0 + A + B, data=d)
+lm(Y ~ A + B - 1, data=d)
+lm(Y ~ -1 + A + B, data=d)
+OK, enough warm up. On to the ANOVAs
+
+CLASSICAL ANOVA
+We start with simple additive fixed effects model using the built in function aov
+
+aov(Y ~ A + B, data=d)
+To cross these factors, or more generally to interact two variables we use either of
+
+aov(Y ~ A * B, data=d)
+aov(Y ~ A + B + A:B, data=d)
+So far so familiar. Now assume that B is nested within A
+
+aov(Y ~ A/B, data=d)
+aov(Y ~ A + B %in% A, data=d)
+aov(Y ~ A + A:B, data=d)
+so, nesting amounts to adding one main effect and one interaction.
+
+RANDOM EFFECTS IN CLASSICAL ANOVA
+aov can deal with random effects too, provided everything is nicely balanced. Assume A is a lone random effect, e.g. a subject indicator
+
+aov(Y ~ Error(A), data=d)
+Now assume A is random, but B is fixed and B is nested within A.
+
+aov(Y ~ B + Error(A/B), data=d)
+or maybe B and X are crossed (interacted) within levels of random A.
+
+aov(Y ~ (B*X) + Error(A/(B*X)), data=d)
+Or perhaps B and X within random A are categorized by (non-nested) G and H:
+
+aov(Y ~ (B*X*G*H) + Error(A/(B*X)) + (G*H), data=d)
+Yuck. This Error business can get confusing and the balance requirements tiresome, so for random effects models its usually easier to move to lme4.
+
+MIXED AND MULTILEVEL MODELS
+Let’s start again with the lone random effects model
+
+lmer(Y ~ 1 + (1 | A), data=d)
+Random effects, like (1 | A), are parenthetical terms containing a conditioning bar and wedged into the body of the formula. As the notation suggests, this is a conditional distribution of possible case level intercepts for each level or quantity of A. Still, the semantics should be familiar: (B | A) is equivalent to (1 + B | A) and the way to not automatically get an intercept added is to specify (0 + B | A) or perhaps more confusingly (B – 1 | A).
+
+Now assume that B is fixed but A is random
+
+lmer(Y ~ B + (1 | A), data=d)
+lmer(Y ~ 1 + B + (1 | A), data=d)
+Now let’s reconsider nested variables. If A is random, B is fixed, and B is nested within A then
+
+lmer(Y ~ B + (1 | A:B), data=d)
+Now the advantage of using lmer is that it is easy to state the relationship between two random effects. For example, if A and B are both random and crossed i.e. marginally independent, then
+
+lmer(Y ~ 1 + (1 | A) + (1 | B), data=d)
+Interestingly, if levels of (random) B are nested within levels of (random) A then the formula looks very much the same. However, this leads to an ambiguity.
+
+Assume each level of A nests six levels of B, for example if we took six samples (B) from each of five subjects (A). If we label each subject’s samples 1, 2, 3, 4, 5, and 6 then although there are five subjects with B=1 these samples are completely unrelated. Unfortunately, this is just the way the data would look if A and B were actually crossed factors.
+
+Bates suggests avoiding this design ambiguity by generating a new variable to represent the nesting. In general, this is just A:B, just as it was above.
+
+lmer(Y ~ 1 + (1 | A) + (1 | A:B), data=d)
+lmer(Y ~ 1 + (1 | A/B), data=d)
+This expresses the nesting and ensures that we don’t accidentally do a crossed factor analysis.
+
+Moving further into multilevel regression territory, let’s assume that A is random and both the intercept and the slope of B depend on A. With no constraint on the slope-intercept relationship we have
+
+lmer(Y ~ 1 + B + (1 + B | A), data=d)
+but if we want to force B’s intercept and slope to be independent conditional on A then
+
+lmer(Y ~ 1 + B + (1 | A) + (0 + B | A), data=d)
+Here is a rare situation where it is sensible to remove an intercept, but only because the other random effect looks after it.
+The second is a more parsimonious model but of course we’d want to check that the we weren’t missing anything important by making slope and intercept independent.
+
+SOURCES AND FURTHER READING
+Much of this information was gleaned from the personality-project‘s pages on doing ANOVA in R, from various Doug Bates course handouts, e.g. this one, and an R News article (pp.27-30), and from experimentation. A more ANOVA-focused piece is at statmethods.
